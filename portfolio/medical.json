@@ -1,0 +1,19 @@
+{
+  "name": "medical",
+  "positions": [
+    { "ticker": "BABA", "allocation_pct": 5.1772 },
+    { "ticker": "FXI", "allocation_pct": 2.2963 },
+    { "ticker": "KWEB", "allocation_pct": 2.5920 },
+    { "ticker": "SPY", "allocation_pct": 5.6238 },
+    { "ticker": "IVV", "allocation_pct": 5.6568 },
+    { "ticker": "XLV", "allocation_pct": 4.5561 },
+    { "ticker": "IWO", "allocation_pct": 5.6382 },
+    { "ticker": "QQQ", "allocation_pct": 19.2361 },
+    { "ticker": "EEM", "allocation_pct": 6.2295 },
+    { "ticker": "HACK", "allocation_pct": 5.5303 },
+    { "ticker": "BUG", "allocation_pct": 1.5033 },
+    { "ticker": "SWVXX", "allocation_pct": 35.9604 }
+  ],
+  "themes": ["indexing", "international", "cybersecurity", "healthcare"],
+  "risk_level": "medium"
+}

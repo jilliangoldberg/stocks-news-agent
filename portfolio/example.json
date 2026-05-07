@@ -1,0 +1,10 @@
+{
+  "positions": [
+    { "ticker": "AAPL", "allocation_pct": 25.0 },
+    { "ticker": "NVDA", "allocation_pct": 25.0 },
+    { "ticker": "TSLA", "allocation_pct": 20.0 },
+    { "ticker": "VOO", "allocation_pct": 30.0 }
+  ],
+  "themes": ["AI", "tech", "consumer"],
+  "risk_level": "medium"
+}

@@ -1,0 +1,23 @@
+{
+  "name": "roth_ira",
+  "positions": [
+    { "ticker": "DIS", "allocation_pct": 0.6150 },
+    { "ticker": "IHI", "allocation_pct": 0.9287 },
+    { "ticker": "ICLN", "allocation_pct": 0.3383 },
+    { "ticker": "FXI", "allocation_pct": 0.3713 },
+    { "ticker": "KWEB", "allocation_pct": 0.2905 },
+    { "ticker": "XLF", "allocation_pct": 2.2780 },
+    { "ticker": "IXJ", "allocation_pct": 0.5976 },
+    { "ticker": "ITOT", "allocation_pct": 1.9924 },
+    { "ticker": "SPTM", "allocation_pct": 6.5160 },
+    { "ticker": "SPY", "allocation_pct": 29.1571 },
+    { "ticker": "IVV", "allocation_pct": 4.5798 },
+    { "ticker": "VOO", "allocation_pct": 4.1888 },
+    { "ticker": "CQQQ", "allocation_pct": 0.3193 },
+    { "ticker": "QQQ", "allocation_pct": 41.3264 },
+    { "ticker": "IWP", "allocation_pct": 2.0790 },
+    { "ticker": "SWPPX", "allocation_pct": 4.4218 }
+  ],
+  "themes": ["indexing", "technology", "international", "healthcare"],
+  "risk_level": "medium"
+}
