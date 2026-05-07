@@ -16,7 +16,12 @@ load_dotenv()
 # ── Configuration ─────────────────────────────────────────────────────────────
 
 PORTFOLIO = {
-    "holdings": ["AAPL", "NVDA", "TSLA", "VOO"],
+    "positions": [
+        {"ticker": "AAPL", "allocation_pct": 25.0},
+        {"ticker": "NVDA", "allocation_pct": 25.0},
+        {"ticker": "TSLA", "allocation_pct": 20.0},
+        {"ticker": "VOO", "allocation_pct": 30.0},
+    ],
     "themes": ["AI", "tech", "consumer"],
     "risk_level": "medium",
 }
@@ -32,9 +37,125 @@ NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 NYT_API_KEY = os.getenv("NYT_API_KEY")
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 OUTPUT_DIR = os.getenv("OUTPUT_DIR", "./briefs")
+PORTFOLIO_FILE = os.getenv("PORTFOLIO_FILE", "./portfolio.json")
+PORTFOLIO_DIR = os.getenv("PORTFOLIO_DIR", "./portfolio")
 
 TOP_N_ARTICLES = 12
 NEWS_FETCH_COUNT = 20
+
+
+def get_holdings(portfolio: dict) -> list[str]:
+    """Extract ticker symbols from positions."""
+    if portfolio.get("accounts"):
+        tickers = []
+        for account in portfolio["accounts"]:
+            tickers.extend([position["ticker"] for position in account.get("positions", [])])
+        return sorted(set(tickers))
+    return [position["ticker"] for position in portfolio.get("positions", [])]
+
+
+def format_positions(portfolio: dict) -> str:
+    """Format positions as 'TICKER X%' text."""
+    if portfolio.get("accounts"):
+        account_strings = []
+        for account in portfolio["accounts"]:
+            positions_text = ", ".join(
+                [f"{position['ticker']}: {position['allocation_pct']}%" for position in account.get("positions", [])]
+            )
+            account_strings.append(f"{account['name']} [{positions_text}]")
+        return " | ".join(account_strings)
+
+    return ", ".join(
+        [f"{position['ticker']}: {position['allocation_pct']}%" for position in portfolio.get("positions", [])]
+    )
+
+
+def validate_positions_allocations(positions: list[dict], scope_label: str) -> None:
+    """Validate position entries and that allocations sum to 100."""
+    if not positions:
+        raise ValueError(f"{scope_label} must include at least one position in 'positions'.")
+
+    total_allocation = 0.0
+    for position in positions:
+        ticker = (position.get("ticker") or "").strip().upper()
+        allocation_pct = position.get("allocation_pct")
+        if not ticker:
+            raise ValueError(f"{scope_label}: each position must include a non-empty 'ticker'.")
+        if not isinstance(allocation_pct, (int, float)):
+            raise ValueError(f"{scope_label}: position {ticker} is missing numeric 'allocation_pct'.")
+        if allocation_pct < 0:
+            raise ValueError(f"{scope_label}: position {ticker} has a negative allocation.")
+        total_allocation += float(allocation_pct)
+
+    # Tolerate tiny floating-point noise while enforcing exact 100%.
+    if abs(total_allocation - 100.0) > 0.001:
+        raise ValueError(
+            f"{scope_label} allocation must equal 100%. Current total: {total_allocation:.2f}%."
+        )
+
+
+def validate_portfolio_allocations(portfolio: dict) -> None:
+    """Validate allocations for single-account or multi-account portfolio."""
+    if portfolio.get("accounts"):
+        for account in portfolio["accounts"]:
+            account_name = account.get("name", "account")
+            validate_positions_allocations(account.get("positions", []), f"Account '{account_name}'")
+        return
+
+    validate_positions_allocations(portfolio.get("positions", []), "Portfolio")
+
+
+def load_portfolio_from_directory() -> dict:
+    """Load all account files from portfolio directory."""
+    account_files = sorted(
+        [file_name for file_name in os.listdir(PORTFOLIO_DIR) if file_name.endswith(".json")]
+    )
+    if not account_files:
+        raise ValueError(f"No account JSON files found in {PORTFOLIO_DIR}.")
+
+    accounts = []
+    for file_name in account_files:
+        account_path = os.path.join(PORTFOLIO_DIR, file_name)
+        with open(account_path, "r") as f:
+            account = json.load(f)
+
+        account_name = account.get("name") or os.path.splitext(file_name)[0]
+        accounts.append(
+            {
+                "name": account_name,
+                "positions": account.get("positions", []),
+                "themes": account.get("themes", []),
+                "risk_level": account.get("risk_level", "medium"),
+            }
+        )
+
+    merged_themes = sorted(
+        set(theme for account in accounts for theme in account.get("themes", []))
+    )
+
+    return {
+        "accounts": accounts,
+        "themes": merged_themes,
+        "risk_level": "mixed" if len(set(a.get("risk_level") for a in accounts)) > 1 else accounts[0].get("risk_level", "medium"),
+    }
+
+
+def load_portfolio() -> dict:
+    """Load portfolio from ./portfolio/*.json, then portfolio.json, else fallback default."""
+    if os.path.isdir(PORTFOLIO_DIR):
+        loaded_portfolio = load_portfolio_from_directory()
+        validate_portfolio_allocations(loaded_portfolio)
+        return loaded_portfolio
+
+    if not os.path.exists(PORTFOLIO_FILE):
+        validate_portfolio_allocations(PORTFOLIO)
+        return PORTFOLIO
+
+    with open(PORTFOLIO_FILE, "r") as f:
+        loaded_portfolio = json.load(f)
+
+    validate_portfolio_allocations(loaded_portfolio)
+    return loaded_portfolio
 
 
 # ── Step 1: News ingestion ────────────────────────────────────────────────────
@@ -114,7 +235,7 @@ def score_article(article: dict, portfolio: dict) -> float:
             score += 1.0
 
     # Portfolio ticker mentions (higher weight)
-    for ticker in portfolio["holdings"]:
+    for ticker in get_holdings(portfolio):
         if ticker.lower() in text:
             score += 3.0
 
@@ -182,7 +303,7 @@ def build_prompt(articles: list[dict], portfolio: dict) -> str:
     prompt = f"""You are a market intelligence analyst generating a concise daily brief for a private investor.
 
 PORTFOLIO CONTEXT (no sensitive data included):
-- Holdings: {', '.join(portfolio['holdings'])}
+- Holdings & allocations (%): {format_positions(portfolio)}
 - Investment themes: {', '.join(portfolio['themes'])}
 - Risk level: {portfolio['risk_level']}
 
@@ -198,7 +319,7 @@ Bullet-point summaries of the 4–5 most important articles. One sentence each.
 Short analysis of: (a) inflation/rates outlook, (b) sector trends, (c) overall risk sentiment. 2–3 sentences.
 
 ## 3. Portfolio impact
-For each holding ({', '.join(portfolio['holdings'])}), one sentence on how today's news may affect it. Include a signal tag: [Watch] / [Hold] / [Caution].
+For each holding ({', '.join(get_holdings(portfolio))}), one sentence on how today's news may affect it. Include a signal tag: [Watch] / [Hold] / [Caution].
 
 ## 4. Opportunities & risks
 2–3 bullet points on emerging opportunities or downside risks visible in today's news.
@@ -234,7 +355,7 @@ def run_llm(prompt: str) -> str:
 
 # ── Step 5: Save output ───────────────────────────────────────────────────────
 
-def save_output(brief: str, articles: list[dict]) -> str:
+def save_output(brief: str, articles: list[dict], portfolio: dict) -> str:
     """Save brief as a .txt file and articles metadata as .json."""
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     date_str = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -244,7 +365,8 @@ def save_output(brief: str, articles: list[dict]) -> str:
     header = (
         f"# AI Market Intelligence Brief\n"
         f"**Generated:** {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}  \n"
-        f"**Portfolio:** {', '.join(PORTFOLIO['holdings'])}\n\n"
+        f"**Portfolio:** {', '.join(get_holdings(portfolio))}\n"
+        f"**Allocations:** {format_positions(portfolio)}\n\n"
         f"---\n\n"
     )
     with open(brief_path, "w") as f:
@@ -268,22 +390,29 @@ def run_agent():
     print(f"  {datetime.datetime.now().strftime('%A, %B %-d %Y · %I:%M %p')}")
     print("═" * 60 + "\n")
 
+    portfolio = load_portfolio()
+    if portfolio.get("accounts"):
+        account_names = ", ".join(account["name"] for account in portfolio["accounts"])
+        print(f"Portfolio account allocation checks passed: {account_names}")
+    else:
+        print(f"Portfolio allocation check passed: {sum(p['allocation_pct'] for p in portfolio['positions']):.2f}%")
+
     # Step 1 — Fetch
     raw_articles = fetch_news()
 
     # Step 2 — Filter & rank
-    top_articles = filter_and_rank(raw_articles, PORTFOLIO)
+    top_articles = filter_and_rank(raw_articles, portfolio)
 
     if not top_articles:
         print("No relevant articles found today. Exiting.")
         return
 
     # Step 3+4 — Prompt + LLM
-    prompt = build_prompt(top_articles, PORTFOLIO)
+    prompt = build_prompt(top_articles, portfolio)
     brief = run_llm(prompt)
 
     # Step 5 — Save
-    save_output(brief, top_articles)
+    save_output(brief, top_articles, portfolio)
 
     # Print to console
     print("\n" + "─" * 60)

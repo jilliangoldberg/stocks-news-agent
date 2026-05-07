@@ -31,7 +31,7 @@ cp .env.example .env
 python agent.py
 ```
 
-Briefs are saved to `./briefs/brief_YYYY-MM-DD.txt` and article metadata to `./briefs/articles_YYYY-MM-DD.json`.
+Briefs are saved to `./briefs/brief_YYYY-MM-DD.md` and article metadata to `./briefs/articles_YYYY-MM-DD.json`.
 
 ## Schedule at 8am daily (macOS / Linux)
 
@@ -47,17 +47,47 @@ This runs Monday–Friday at 8:00 AM. Change `1-5` to `*` for all 7 days.
 
 ## Customise your portfolio
 
-Edit the `PORTFOLIO` dict at the top of `agent.py`:
+You can use either:
+- A single file: `portfolio.json`
+- Multiple account files in a folder: `portfolio/*.json` (recommended for multiple accounts)
 
-```python
-PORTFOLIO = {
-    "holdings": ["AAPL", "NVDA", "TSLA", "VOO"],  # your tickers
-    "themes": ["AI", "tech", "consumer"],           # your investment themes
-    "risk_level": "medium",                          # low / medium / high
+### Option A: Single account (`portfolio.json`)
+
+```json
+{
+  "positions": [
+    { "ticker": "AAPL", "allocation_pct": 25.0 },
+    { "ticker": "NVDA", "allocation_pct": 25.0 },
+    { "ticker": "TSLA", "allocation_pct": 20.0 },
+    { "ticker": "VOO", "allocation_pct": 30.0 }
+  ],
+  "themes": ["AI", "tech", "consumer"],
+  "risk_level": "medium"
 }
 ```
 
-No dollar amounts, balances, or account info — only tickers and themes.
+The agent validates that all `allocation_pct` values add up to exactly `100%` (with tiny float tolerance).
+No dollar amounts, balances, or account info are stored — only ticker symbols and percentages.
+
+### Option B: Multiple accounts (`portfolio/`)
+
+Create one JSON file per account (for example `portfolio/taxable.json`, `portfolio/retirement.json`):
+
+```json
+{
+  "name": "taxable",
+  "positions": [
+    { "ticker": "AAPL", "allocation_pct": 35.0 },
+    { "ticker": "NVDA", "allocation_pct": 25.0 },
+    { "ticker": "VOO", "allocation_pct": 40.0 }
+  ],
+  "themes": ["AI", "tech", "core"],
+  "risk_level": "medium"
+}
+```
+
+Each account file is validated independently, and each account must total `100%`.
+If `portfolio/` exists, the agent uses account files from that folder first.
 
 ## Output structure
 
