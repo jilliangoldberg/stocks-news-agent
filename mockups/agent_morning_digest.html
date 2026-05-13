@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stocks Agent — Morning digest (mockup)</title>
+  <!--
+    Subject: Your cool-toned market brew — Tue, May 12
+    Preheader: Top stories, buy radar, and a holdings glance — ~5 min with your AI co-pilot.
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-top: #dbeafe;
+      --bg-mid: #f0f9ff;
+      --bg-bottom: #f8fafc;
+      --paper: #ffffff;
+      --ink: #0f172a;
+      --ink-soft: #475569;
+      --line: #e2e8f0;
+      --line-dash: #cbd5e1;
+      --accent: #2563eb;
+      --accent-soft: #eff6ff;
+      --sky: #0ea5e9;
+      --cyan: #0891b2;
+      --indigo: #6366f1;
+      --violet: #7c3aed;
+      --header-end: #1d4ed8;
+      --footer-bg: #0f172a;
+      --shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 12px 32px rgba(30, 58, 138, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 35%, var(--bg-bottom) 100%);
+      color: var(--ink);
+      font-family: "DM Sans", "Helvetica Neue", Helvetica, system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 28px 16px 48px;
+    }
+    @media (min-width: 760px) {
+      .wrap { padding: 36px 24px 56px; }
+    }
+    .shell {
+      background: var(--paper);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(226, 232, 240, 0.95);
+      overflow: hidden;
+    }
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 52%, var(--header-end) 100%);
+      padding: 36px 28px 32px;
+      text-align: center;
+    }
+    @media (min-width: 600px) {
+      .hero { padding: 40px 44px 36px; }
+    }
+    .eyebrow {
+      margin: 0 0 8px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: #93c5fd;
+    }
+    .hero h1 {
+      margin: 0;
+      font-family: "Fraunces", Georgia, serif;
+      font-size: clamp(1.85rem, 5vw, 2.35rem);
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+    .hero .brand {
+      display: block;
+      margin-top: 10px;
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #bfdbfe;
+    }
+    .hero-meta {
+      margin: 14px 0 0;
+      font-size: 0.82rem;
+      color: #93c5fd;
+      font-weight: 500;
+    }
+    .banner {
+      background: linear-gradient(90deg, #dbeafe 0%, #eff6ff 100%);
+      padding: 16px 24px;
+      border-bottom: 1px solid #bfdbfe;
+    }
+    @media (min-width: 600px) {
+      .banner { padding: 16px 40px; }
+    }
+    .banner p {
+      margin: 0;
+      font-size: 0.92rem;
+      color: #1e40af;
+      line-height: 1.5;
+    }
+    .inner {
+      padding: 28px 24px 8px;
+    }
+    @media (min-width: 600px) {
+      .inner { padding: 32px 40px 12px; }
+    }
+    .kicker {
+      margin: 0 0 4px;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    h2.section-title {
+      margin: 0 0 18px;
+      font-family: "Fraunces", Georgia, serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+    }
+    .story-card {
+      margin-bottom: 14px;
+      background: #f8fafc;
+      border-radius: 14px;
+      border-left: 4px solid var(--rail, var(--accent));
+      padding: 16px 18px;
+    }
+    .story-card .cat {
+      margin: 0 0 6px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--rail-label, var(--accent));
+    }
+    .story-card h3 {
+      margin: 0 0 8px;
+      font-family: "Fraunces", Georgia, serif;
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.35;
+    }
+    .story-card p {
+      margin: 0;
+      font-size: 0.88rem;
+      color: var(--ink-soft);
+      line-height: 1.6;
+    }
+    .rail-sky { --rail: #0ea5e9; --rail-label: #0284c7; }
+    .rail-blue { --rail: #2563eb; --rail-label: #1d4ed8; }
+    .rail-indigo { --rail: #6366f1; --rail-label: #4f46e5; }
+    .rail-cyan { --rail: #06b6d4; --rail-label: #0891b2; }
+    .divider {
+      height: 0;
+      border: none;
+      border-top: 1px dashed var(--line-dash);
+      margin: 28px 0;
+    }
+    .subdeck {
+      margin: -10px 0 20px;
+      font-size: 0.88rem;
+      color: var(--ink-soft);
+      line-height: 1.55;
+    }
+    .radar-grid {
+      display: grid;
+      gap: 14px;
+      margin-bottom: 8px;
+    }
+    @media (min-width: 560px) {
+      .radar-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .radar {
+      border-radius: 14px;
+      padding: 18px 18px 16px;
+      color: #fff;
+      min-height: 100%;
+    }
+    .radar .tier {
+      margin: 0 0 6px;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      opacity: 0.88;
+    }
+    .radar .sym {
+      margin: 0 0 4px;
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .radar .meta {
+      margin: 0 0 12px;
+      font-size: 0.78rem;
+      opacity: 0.9;
+      line-height: 1.4;
+    }
+    .radar .blurb {
+      margin: 0;
+      font-size: 0.82rem;
+      line-height: 1.55;
+      opacity: 0.95;
+    }
+    .radar .tagline {
+      margin: 12px 0 0;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .g-slate {
+      background: linear-gradient(145deg, #0f172a 0%, #1e3a8a 55%, #1d4ed8 100%);
+    }
+    .g-slate .tagline { color: #7dd3fc; }
+    .g-teal {
+      background: linear-gradient(145deg, #0f766e 0%, #0d9488 45%, #0891b2 100%);
+    }
+    .g-teal .tagline { color: #99f6e4; }
+    .g-ice {
+      background: linear-gradient(145deg, #1e40af 0%, #2563eb 40%, #38bdf8 100%);
+    }
+    .g-ice .tagline { color: #e0f2fe; }
+    .g-indigo {
+      background: linear-gradient(145deg, #312e81 0%, #4338ca 50%, #6366f1 100%);
+    }
+    .g-indigo .tagline { color: #c7d2fe; }
+    .holdings {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 8px 0 4px;
+      font-size: 0.82rem;
+      box-shadow: 0 0 0 1px var(--line);
+    }
+    .holdings th {
+      background: #0f172a;
+      color: #93c5fd;
+      text-align: left;
+      padding: 11px 14px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .holdings td {
+      padding: 11px 14px;
+      border-top: 1px solid var(--line);
+      vertical-align: top;
+    }
+    .holdings tr:nth-child(even) td { background: #f8fafc; }
+    .holdings tr:nth-child(odd) td { background: #fff; }
+    .holdings .tk { font-weight: 700; color: var(--ink); }
+    .pill {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 4px 9px;
+      border-radius: 999px;
+    }
+    .pill-hold { background: #ecfdf5; color: #047857; }
+    .pill-watch { background: #fffbeb; color: #b45309; }
+    .pill-caution { background: #fef2f2; color: #b91c1c; }
+    .bottom {
+      margin: 8px 0 32px;
+      background: linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%);
+      border: 1px solid #bfdbfe;
+      border-radius: 14px;
+      padding: 20px 22px;
+    }
+    .bottom h3 {
+      margin: 0 0 10px;
+      font-family: "Fraunces", Georgia, serif;
+      font-size: 1.08rem;
+      color: var(--ink);
+    }
+    .bottom p { margin: 0; font-size: 0.88rem; color: var(--ink-soft); line-height: 1.65; }
+    .foot {
+      background: var(--footer-bg);
+      padding: 28px 24px 32px;
+      text-align: center;
+    }
+    .foot .title {
+      margin: 0 0 6px;
+      font-family: "Fraunces", Georgia, serif;
+      font-size: 1.1rem;
+      color: #fff;
+    }
+    .foot .sub {
+      margin: 0 0 14px;
+      font-size: 0.8rem;
+      color: #93c5fd;
+    }
+    .foot .legal {
+      margin: 0;
+      font-size: 0.72rem;
+      color: #64748b;
+      line-height: 1.65;
+    }
+    .foot a { color: #7dd3fc; text-decoration: none; font-weight: 600; }
+    .fine {
+      font-size: 0.74rem;
+      color: #94a3b8;
+      margin: 20px 0 0;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="shell">
+      <header class="hero">
+        <p class="eyebrow">Your personal</p>
+        <h1>Market Morning <span style="font-style:normal">🌊</span></h1>
+        <span class="brand">stocksagent digest</span>
+        <p class="hero-meta">Tuesday, May 12, 2026 · ~5 min read · Medium risk portfolio</p>
+      </header>
+
+      <div class="banner">
+        <p>☕ <strong>Good morning, Jillian!</strong> Markets are about to wake up — here’s a cool-headed skim before the bell.</p>
+      </div>
+
+      <div class="inner">
+        <p class="kicker">Today’s vibe</p>
+        <h2 class="section-title">📰 Top stories</h2>
+
+        <article class="story-card rail-sky">
+          <p class="cat">AI &amp; markets</p>
+          <h3>Megacap AI is still eating the index</h3>
+          <p>NVDA and friends keep dragging benchmarks higher. Great if you’re indexed; a gentle nudge to peek at concentration if you’re accidentally “all tech.”</p>
+        </article>
+        <article class="story-card rail-blue">
+          <p class="cat">Regulatory watch</p>
+          <h3>Microsoft’s OpenAI ties had a courtroom moment</h3>
+          <p>Headline risk, not a verdict — but a reminder that AI partnerships can swing sentiment faster than fundamentals.</p>
+        </article>
+        <article class="story-card rail-indigo">
+          <p class="cat">Market divergence</p>
+          <h3>Nasdaq firm, consumer surveys sour</h3>
+          <p>Wall Street and Main Street are on different pages. Easy to chase green opens; harder to ignore what bonds and households are whispering.</p>
+        </article>
+        <article class="story-card rail-cyan">
+          <p class="cat">Global risk</p>
+          <h3>EM tape noisy — India moved, headlines stayed hot</h3>
+          <p>If you own broad EM, think risk premium and flows, not a clean story. Expect chop until the newsfeed cools.</p>
+        </article>
+
+        <hr class="divider" />
+
+        <p class="kicker">Opportunities</p>
+        <h2 class="section-title">🛒 Buy radar</h2>
+        <p class="subdeck">Names worth a <em>look</em> today from news + momentum + how they sit next to your book. Not financial advice — just the agent’s shortlist.</p>
+
+        <div class="radar-grid">
+          <div class="radar g-slate">
+            <p class="tier">On watch</p>
+            <p class="sym">GOOGL</p>
+            <p class="meta">Alphabet · ~7.8% of portfolio</p>
+            <p class="blurb">AI + index gravity; MSFT noise might reshuffle “favorite hyperscaler” chat. Already a core line — more rebalance than revelation.</p>
+            <p class="tagline">↗ Narrative tailwind</p>
+          </div>
+          <div class="radar g-teal">
+            <p class="tier">Theme gap</p>
+            <p class="sym">HACK</p>
+            <p class="meta">Cybersecurity ETF · tiny sleeve</p>
+            <p class="blurb">Geopolitical headlines tend to remind everyone that attack surface exists. If you’ve been meaning to size structural security, today’s a decent excuse to plan adds.</p>
+            <p class="tagline">◇ Underweight + catalyst chatter</p>
+          </div>
+          <div class="radar g-ice">
+            <p class="tier">Patience game</p>
+            <p class="sym">SMH</p>
+            <p class="meta">Semis ETF</p>
+            <p class="blurb">AI silicon demand still the magnet under the hood. If you like the theme but hate chasing rips, keep a “buy the boring pullback” note on a sticky.</p>
+            <p class="tagline">→ Wait for a cleaner entry</p>
+          </div>
+          <div class="radar g-indigo">
+            <p class="tier">High beta</p>
+            <p class="sym">BITO</p>
+            <p class="meta">Bitcoin ETF · nibbler size</p>
+            <p class="blurb">Tape’s been lively; correlation to “risk on” can cut both ways. Fine as a satellite — not as a hero ball.</p>
+            <p class="tagline">↗ Momentum, wide bands</p>
+          </div>
+        </div>
+
+        <hr class="divider" />
+
+        <p class="kicker">Your portfolio</p>
+        <h2 class="section-title">📊 Holdings snapshot</h2>
+        <table class="holdings">
+          <thead>
+            <tr>
+              <th>Ticker</th>
+              <th>Weight</th>
+              <th>Signal</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="tk">QQQ</td>
+              <td>26.5%</td>
+              <td><span class="pill pill-hold">Hold</span></td>
+              <td>AI tailwind; largest basket — let compounding do the boring part.</td>
+            </tr>
+            <tr>
+              <td class="tk">SPY</td>
+              <td>17.2%</td>
+              <td><span class="pill pill-hold">Hold</span></td>
+              <td>Core ballast; mixed macro says “don’t hero-trade the base.”</td>
+            </tr>
+            <tr>
+              <td class="tk">GOOGL</td>
+              <td>7.8%</td>
+              <td><span class="pill pill-hold">Hold</span></td>
+              <td>Relative AI narrative still clean vs. MSFT headline fog.</td>
+            </tr>
+            <tr>
+              <td class="tk">EEM</td>
+              <td>5.1%</td>
+              <td><span class="pill pill-caution">Caution</span></td>
+              <td>EM flows + headlines = friction; size matches your risk budget.</td>
+            </tr>
+            <tr>
+              <td class="tk">KWEB</td>
+              <td>3.6%</td>
+              <td><span class="pill pill-caution">Caution</span></td>
+              <td>No fresh green shoots; sentiment still the driver.</td>
+            </tr>
+            <tr>
+              <td class="tk">MSFT</td>
+              <td>1.1%</td>
+              <td><span class="pill pill-watch">Watch</span></td>
+              <td>OpenAI legal arc — let news resolve before leaning in.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="fine">Stocks Agent merges your portfolio files with NewsAPI / NYT headlines and asks Claude for structure. It can be wrong, late, or too confident — treat this as a starting point, not a mandate.</p>
+
+        <div class="bottom">
+          <p class="kicker">Bottom line</p>
+          <h3>Today’s vibe: cautiously optimistic 🧊</h3>
+          <p>Equities want to party; bonds and consumers are holding a quieter grudge. Core U.S. growth + AI beta still matches your largest sleeves. EM is the messy corner today — fine to hold if that’s the plan, just don’t confuse noise for a new thesis overnight.</p>
+        </div>
+      </div>
+
+      <footer class="foot">
+        <p class="title">Market Morning</p>
+        <p class="sub">Cool-toned digest from stocksagent</p>
+        <p class="legal">
+          Not financial advice. Generated for your inbox.<br />
+          © 2026 · <a href="#">Unsubscribe</a> · <a href="#">View in browser</a> · <a href="#">Open full brief</a>
+        </p>
+      </footer>
+    </div>
+  </div>
+</body>
+</html>
