@@ -1,6 +1,13 @@
 .env
 venv/
-briefs/
 __pycache__/
 *.pyc
 .DS_Store
+.venv/
+
+# Real portfolio files stay local; only the example is shared
+portfolio/*
+!portfolio/example.json
+
+# Briefs include real holdings in the header; article inputs are fine to share
+briefs/brief_*
