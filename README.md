@@ -23,7 +23,8 @@ cp .env.example .env
 ## Get your API keys
 
 - **NewsAPI**: https://newsapi.org/register (free tier: 100 req/day)
-- **OpenAI**: https://platform.openai.com/api-keys
+- **NYT Article Search** (optional second source): https://developer.nytimes.com/get-started
+- **Anthropic**: https://console.anthropic.com/settings/keys
 
 ## Run manually
 
@@ -97,6 +98,26 @@ Each brief covers:
 3. Portfolio impact (per-holding signal)
 4. Opportunities & risks
 5. Suggested actions (non-definitive)
+
+## Evals
+
+The eval harness replays saved article sets (`briefs/articles_*.json`) through the brief generator and scores each brief:
+
+- **Structural checks**: all five sections present, every holding has exactly one `[Watch]`/`[Hold]`/`[Caution]` tag, disclaimer present, no definitive buy/sell phrasing, not truncated at `max_tokens`, and no ticker-like tokens missing from the holdings and articles (warning only).
+- **Grounding**: an LLM judge (default `claude-opus-5-5`) labels each factual claim as supported (by the articles or portfolio), general knowledge, unsupported, or contradicted. The score is the share of claims that are supported or general knowledge.
+
+```bash
+# Quick smoke test without the judge
+python -m evals.run --runs 1 --no-judge
+
+# Compare models, 3 runs per fixture
+python -m evals.run --runs 3 --model claude-sonnet-4-6 --model claude-sonnet-5-5
+
+# Use your real portfolio (results stay local; evals/results/ is gitignored)
+python -m evals.run --portfolio portfolio/
+```
+
+Results go to `evals/results/<timestamp>/` (`summary.md`, `results.json`, and each generated brief). The command exits non-zero if any structural check fails. The model used by `agent.py` can be overridden with `BRIEF_MODEL`.
 
 ## Next steps (after MVP works)
 

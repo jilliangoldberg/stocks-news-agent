@@ -40,6 +40,9 @@ OUTPUT_DIR = os.getenv("OUTPUT_DIR", "./briefs")
 PORTFOLIO_FILE = os.getenv("PORTFOLIO_FILE", "./portfolio.json")
 PORTFOLIO_DIR = os.getenv("PORTFOLIO_DIR", "./portfolio")
 
+DEFAULT_MODEL = os.getenv("BRIEF_MODEL", "claude-sonnet-4-6")
+MAX_TOKENS = 1500
+
 TOP_N_ARTICLES = 12
 NEWS_FETCH_COUNT = 20
 
@@ -333,24 +336,31 @@ For each holding ({', '.join(get_holdings(portfolio))}), one sentence on how tod
 
 # ── Step 4: LLM analysis ─────────────────────────────────────────────────────
 
-def run_llm(prompt: str) -> str:
-    """Call Claude to generate the structured brief."""
+SYSTEM_PROMPT = (
+    "You are a senior market intelligence analyst. "
+    "You write clear, structured, probabilistic daily briefs. "
+    "You never give definitive buy/sell advice. "
+    "You flag uncertainty honestly."
+)
+
+
+def call_llm(prompt: str, model: str = DEFAULT_MODEL):
+    """Call Claude and return the full response (text, stop_reason, usage)."""
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-    print("[4/5] Sending to Claude for analysis...")
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=1500,
-        system=(
-            "You are a senior market intelligence analyst. "
-            "You write clear, structured, probabilistic daily briefs. "
-            "You never give definitive buy/sell advice. "
-            "You flag uncertainty honestly."
-        ),
+    return client.messages.create(
+        model=model,
+        max_tokens=MAX_TOKENS,
+        system=SYSTEM_PROMPT,
         messages=[
             {"role": "user", "content": prompt},
         ],
     )
-    return response.content[0].text
+
+
+def run_llm(prompt: str, model: str = DEFAULT_MODEL) -> str:
+    """Call Claude to generate the structured brief."""
+    print("[4/5] Sending to Claude for analysis...")
+    return call_llm(prompt, model).content[0].text
 
 
 # ── Step 5: Save output ───────────────────────────────────────────────────────

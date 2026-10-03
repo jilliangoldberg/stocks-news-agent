@@ -11,3 +11,6 @@ portfolio/*
 
 # Briefs include real holdings in the header; article inputs are fine to share
 briefs/brief_*
+
+# Eval run outputs (generated briefs, scores)
+evals/results/
